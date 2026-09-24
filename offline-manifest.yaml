@@ -1,0 +1,186 @@
+# PRAMANA offline manifest  --  clause 2.2.6
+#
+# Every wheel, weight file, dataset archive and model fixture that an air-gapped
+# install needs, with its SHA-256, size, upstream source, LICENCE and staging date.
+#
+# `pramana verify-offline` recomputes every digest before an assessment runs.
+# CI runs the suite with networking disabled, so any code path that tries to fetch
+# something instead of finding it here fails the build.
+#
+# Digests marked PENDING have not been staged on this machine yet. They are reported
+# as `missing`, which is not an error -- a development box legitimately holds a subset.
+# A digest that is present and does NOT match is a `mismatch` and fails the command,
+# because an artefact whose bytes differ from the ones we recorded is an artefact
+# nobody has assessed.
+#
+# LICENCE DISCIPLINE. Two classes may never appear in this file:
+#   * NonCommercial (CC BY-NC and relatives) -- not an open-source licence, and a
+#     direct obstacle to the deployment path. BackdoorBench lives in research/ and is
+#     deliberately absent from this manifest.
+#   * Source-available (SSPL, RSALv2, BUSL) -- which is why the queue is Valkey (BSD-3)
+#     rather than Redis, whose licence left BSD in March 2024.
+# `make licence-check` enforces both.
+
+schema_version: "1.0"
+generated_by: "pramana 0.1.0"
+staging_notes: >
+  Stage onto signed removable media, copy into the air-gapped enclave, then run
+  `pramana verify-offline` before the first assessment. Re-run it after any change to
+  the wheelhouse: an unpinned dependency silently voids 21 GPU-hours of fitted null.
+
+artefacts:
+
+  # ------------------------------------------------------------------
+  # Datasets -- required
+  # ------------------------------------------------------------------
+  datasets:
+    - path: data/gtsrb/GTSRB-Training_fixed.zip
+      description: "GTSRB training set as served by torchvision: 26,640 images, 43 classes"
+      role: "The ONLY operational null. Its 43 classes fix the localisation arithmetic."
+      note: >
+        torchvision serves the 'fixed' training release (26,640 images), not the
+        39,209-image official set. The null is fitted on THIS file; the count used is
+        also recorded in nulls/run_manifest.json.
+      source: "torchvision.datasets.GTSRB (download=True), fetched 22 Sep 2026"
+      licence: "CC-BY-4.0"
+      size_human: "187.5 MB"
+      sha256: "sha256:df4144942083645bd60b594de348aa6930126c3e0e5de09e39611630abf8455a"
+      staged_on: "2026-09-22"
+
+    - path: data/gtsrb/GTSRB_Final_Test_Images.zip
+      description: "GTSRB test images, 12,630"
+      source: "torchvision.datasets.GTSRB (download=True)"
+      licence: "CC-BY-4.0"
+      size_human: "89.0 MB"
+      sha256: "sha256:48ba6fab7e877eb64eaf8de99035b0aaecfbc279bee23e35deca4ac1d0a837fa"
+      staged_on: "2026-09-22"
+
+    - path: data/gtsrb/GTSRB_Final_Test_GT.zip
+      description: "GTSRB test labels"
+      source: "torchvision.datasets.GTSRB (download=True)"
+      licence: "CC-BY-4.0"
+      size_human: "0.1 MB"
+      sha256: "sha256:f94e5a7614d75845c74c04ddb26b8796b9e483f43541dd95dd5b726504e16d6d"
+      staged_on: "2026-09-22"
+
+    - path: data/cifar-10-python.tar.gz
+      description: "CIFAR-10, 10 classes, 50,000 train + 10,000 test"
+      role: "The two 32-model contrast arms: corpus contrast and family contrast."
+      source: "torchvision.datasets.CIFAR10 (download=True), fetched 22 Sep 2026"
+      licence: "Free for research use; credit Krizhevsky, Nair and Hinton"
+      size_human: "170.5 MB"
+      sha256: "sha256:6d958be074577803d12ecdefd02955f39262c83c16fe9348329d7fe0b5c001ce"
+      staged_on: "2026-09-22"
+
+  # ------------------------------------------------------------------
+  # Datasets -- optional but strongly recommended
+  # ------------------------------------------------------------------
+  datasets_optional:
+    - path: data/trojai/round4_resnet18_clean/
+      description: "NIST TrojAI image-classification round 4, filtered to clean resnet18 entries"
+      role: >
+        A THIRD-PARTY clean-model population. Fitting a null on models we did not train
+        removes the most consequential simulation in the project, and it costs ~0 GPU
+        hours because it is forward passes rather than training. Round 4 holds 1008
+        models across 16 architectures, so filter by config.json before downloading.
+      source: "https://pages.nist.gov/trojai/docs/image-classification-feb2021.html"
+      licence: "NIST open licence (permissive, attribution)"
+      size_bytes: null
+      size_human: "~15-25 GB filtered (full round is ~100-150 GB, estimated)"
+      sha256: "PENDING"
+      staged_on: null
+
+  # ------------------------------------------------------------------
+  # Backbone -- trained in-house, never downloaded
+  # ------------------------------------------------------------------
+  backbones:
+    - path: artefacts/ood_backbone_smallcnn.pt
+      description: "Frozen feature backbone for the OOD/Mahalanobis detector"
+      role: >
+        MUST be trained on a frozen, pre-procurement, independently sourced public
+        corpus and NEVER on any shard under assessment. Train it on the procurement
+        corpus and a flooded shard becomes part of the reference the detector measures
+        deviation from: flood hard enough and the flood becomes the mode, so detector
+        power falls as the attack succeeds.
+      source: "trained in-house by experiments/train_backbone.py; pretrained=True is a compliance failure"
+      licence: "Apache-2.0 (this project)"
+      sha256: "PENDING"
+      pinned_to_battery_generation: 7
+      staged_on: null
+
+  # ------------------------------------------------------------------
+  # Conformance fixtures -- committed to Git, listed for completeness
+  # ------------------------------------------------------------------
+  fixtures:
+    - path: conformance/coco/good_minimal.json
+      description: "COCO with the source_lot provenance extension"
+      licence: "Apache-2.0 (this project)"
+      sha256: "PENDING"
+    - path: conformance/models/good_smallcnn.torchscript
+      description: "TorchScript fixture, so the loader has a real graph to open"
+      licence: "Apache-2.0 (this project)"
+      sha256: "PENDING"
+
+  # ------------------------------------------------------------------
+  # Python wheelhouse -- hash-checked installs, no index
+  # ------------------------------------------------------------------
+  wheelhouse:
+    - path: wheelhouse/
+      description: "Every wheel for `pip install --no-index --require-hashes`"
+      role: "torch CUDA ~2.5 GB + nvidia dep wheels ~2 GB + onnxruntime ~230 MB + the rest"
+      licence: "see LICENSES/ and the generated CycloneDX SBOM"
+      size_human: "~5 GB (estimate)"
+      sha256: "PENDING (per-wheel hashes live in requirements.lock)"
+      staged_on: null
+
+  # ------------------------------------------------------------------
+  # Container images -- pinned BY DIGEST, exported to tar
+  # ------------------------------------------------------------------
+  images:
+    - path: images/pramana-api.tar
+      description: "API + worker image with torch baked in"
+      role: "A floating tag is a clause 2.2.6 compliance failure, not an inconvenience."
+      licence: "Apache-2.0 (this project) + base image licences"
+      size_human: "~7 GB (estimate)"
+      sha256: "PENDING"
+    - path: images/postgres.tar
+      description: "PostgreSQL, pinned by digest"
+      licence: "PostgreSQL Licence"
+      sha256: "PENDING"
+    - path: images/valkey.tar
+      description: "Valkey, pinned by digest -- BSD-3, NOT Redis"
+      licence: "BSD-3-Clause"
+      sha256: "PENDING"
+    - path: images/console.tar
+      description: "Next.js console, built and served statically"
+      licence: "Apache-2.0 (this project) + MIT deps"
+      sha256: "PENDING"
+
+  # ------------------------------------------------------------------
+  # External anchor material
+  # ------------------------------------------------------------------
+  anchors:
+    - path: anchors/tsa-cert.pem
+      description: "RFC 3161 timestamping authority certificate"
+      role: >
+        The token verifies OFFLINE against this certificate, which is the only property
+        of the three anchoring options that is compatible with the air gap.
+      licence: "n/a (certificate)"
+      sha256: "PENDING"
+
+# ------------------------------------------------------------------
+# Explicitly NOT in this manifest, and why
+# ------------------------------------------------------------------
+excluded:
+  - path: research/backdoorbench/
+    reason: >
+      CC BY-NC-4.0. NonCommercial is not an open-source licence, it obstructs the
+      deployment path, and an AIBOM listing it inside a defence instrument would be a
+      finding against ourselves. Used to cross-check our own attack implementations;
+      never shipped, never imported by pramana/.
+  - path: "any cloud API or hosted model service"
+    reason: "Clause 2.2.6 forbids external dependencies outright."
+  - path: "torchvision pretrained weights"
+    reason: >
+      `pretrained=True` is both an air-gap violation and a reference-contamination bug.
+      The backbone is trained in-house and entered above with provenance.

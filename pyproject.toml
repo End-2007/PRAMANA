@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pramana"
+version = "0.1.0"
+description = "Behavioural integrity assurance for multi-contributor computer-vision pipelines"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "PRAMANA Team" }]
+keywords = ["assurance", "backdoor", "provenance", "computer-vision", "supply-chain"]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Security",
+]
+
+# Runtime deps are deliberately split. The `core` install has NO torch and NO GPU:
+# clause 2.2.6's T1 report/ledger/coverage spine must run on any machine, including
+# the air-gapped review box that never sees a model.
+dependencies = [
+  "pydantic>=2.6,<3",
+  "PyYAML>=6.0",
+  "numpy>=1.26",
+  "scipy>=1.12",
+  "cryptography>=42.0",
+  "click>=8.1",
+  "rich>=13.7",
+]
+
+[project.optional-dependencies]
+ml = [
+  "torch>=2.2",
+  "torchvision>=0.17",
+  "onnx>=1.15",
+  "onnxruntime>=1.17",
+  "Pillow>=10.2",
+]
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "psycopg[binary]>=3.1",
+  "redis>=5.0",          # wire-compatible client; the SERVER we ship is Valkey (BSD-3)
+  "rq>=1.16",
+]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=4.1",
+  "ruff>=0.3",
+  "pip-licenses>=4.3",
+  "cyclonedx-bom>=4.0",
+  "reuse>=3.0",
+]
+
+[project.scripts]
+pramana = "pramana.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pramana"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

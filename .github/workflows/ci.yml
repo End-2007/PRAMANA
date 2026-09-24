@@ -1,0 +1,133 @@
+name: ci
+
+# Clause 2.2.6 mandates air-gapped operation. The claim is only true if something
+# enforces it, so the test job runs with outbound network DISABLED: any code path that
+# tries to fetch weights, a dataset or an index fails the build rather than working
+# quietly on a machine that happens to be online.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: gates, tests, licences
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # Installation is the ONLY step permitted to reach the network.
+      - name: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install pip-licenses cyclonedx-bom
+
+      - name: fixtures
+        run: python scripts/make_fixtures.py
+
+      # ---- from here on, no network ----------------------------------------
+      # unshare drops the network namespace for the child process. A library that
+      # quietly fetches on first use dies here rather than in judging.
+      - name: ingest conformance (offline)
+        run: unshare -rn python -m pramana.cli selftest
+
+      - name: demo (offline)
+        run: unshare -rn python -m pramana.cli demo --out out
+
+      - name: report validate -- the six comparator pairs (offline)
+        run: unshare -rn python -m pramana.cli report validate out/report.json
+
+      - name: coverage -- a class with no disposition fails the build (offline)
+        run: unshare -rn python -m pramana.cli coverage check
+
+      - name: build gates (offline)
+        run: unshare -rn python gates/pramana_gates.py
+
+      - name: tests + mutation tests (offline)
+        run: unshare -rn python -m pytest tests/ -q
+
+      # The coverage generator must FAIL when a class loses its disposition. A gate
+      # nobody has tried to break is still only a claim, so we break it on purpose and
+      # assert the build stops.
+      - name: negative control -- removing a reason must fail the build
+        run: |
+          cp taxonomy.yaml taxonomy.yaml.bak
+          python - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("taxonomy.yaml")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace(
+              'reason: "Reversal parameterisation does not cover warping fields at T1."',
+              'reason: ""',
+              1,
+          )
+          p.write_text(s, encoding="utf-8")
+          PY
+          if python -m pramana.cli coverage check; then
+            echo "::error::coverage check PASSED with an empty reason. The gate is not working."
+            mv taxonomy.yaml.bak taxonomy.yaml
+            exit 1
+          else
+            echo "negative control OK: the build failed as it should"
+            mv taxonomy.yaml.bak taxonomy.yaml
+          fi
+
+      - name: licence position -- no NonCommercial or source-available dependency
+        run: |
+          python -c "
+          from pramana.offline import manifest_summary
+          s = manifest_summary()
+          print('manifest licences:', s['licences'])
+          for f in s['flagged']:
+              print('FLAGGED:', f)
+          raise SystemExit(0 if s['clean'] else 1)
+          "
+          if pip-licenses --format=plain 2>/dev/null | grep -Ei 'NonCommercial|CC-BY-NC|SSPL|RSAL|Business Source'; then
+            echo "::error::a forbidden licence is installed"
+            exit 1
+          fi
+          echo "pip tree clean"
+
+      - name: sbom
+        run: cyclonedx-py environment -o sbom.cyclonedx.json || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assurance-artefacts
+          path: |
+            out/report.json
+            out/ledger.jsonl
+            sbom.cyclonedx.json
+          if-no-files-found: warn
+
+      - name: lint
+        run: ruff check pramana api worker gates tests
+
+  console:
+    name: console build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: console/package-lock.json
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npx next build

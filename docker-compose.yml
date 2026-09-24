@@ -1,0 +1,100 @@
+# PRAMANA -- air-gapped deployment.
+#
+# Clause 2.2.6 mandates offline operation, so every image is pinned BY DIGEST rather
+# than by tag. A floating tag is a compliance failure, not an inconvenience: `:16` is
+# a different set of bytes next month and nobody would know.
+#
+# Bring-up on an air-gapped host:
+#   make offline-bundle          # on a connected machine: pull, export to tar
+#   ...carry the tar across...
+#   make offline-load            # docker load every image
+#   docker compose up            # no registry contacted
+#
+# NOTE ON THE QUEUE. This is Valkey, not Redis. Redis left BSD-3-Clause in March 2024
+# and is now tri-licensed AGPLv3/SSPLv1/RSALv2; Valkey is a BSD-3 drop-in under Linux
+# Foundation governance. A defence assurance instrument should not carry a
+# source-available dependency, and gates/pramana_gates.py MUST 13 fails the build if a
+# redis image reappears here.
+
+services:
+  db:
+    # postgres:16.6-alpine
+    image: postgres@sha256:PINNED_DIGEST_HERE
+    environment:
+      POSTGRES_USER: pramana
+      POSTGRES_PASSWORD: pramana
+      POSTGRES_DB: pramana
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pramana"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+
+  queue:
+    # valkey/valkey:8-alpine  -- BSD-3-Clause
+    image: valkey/valkey@sha256:PINNED_DIGEST_HERE
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      PRAMANA_DB_URL: postgresql://pramana:pramana@db:5432/pramana
+      PRAMANA_QUEUE_URL: redis://queue:6379/0   # wire protocol name; the SERVER is Valkey
+      PRAMANA_OFFLINE: "1"
+    volumes:
+      - ./out:/app/out
+      - ./conformance:/app/conformance:ro
+      - ./taxonomy.yaml:/app/taxonomy.yaml:ro
+      - ./offline-manifest.yaml:/app/offline-manifest.yaml:ro
+    depends_on:
+      db: {condition: service_healthy}
+      queue: {condition: service_healthy}
+    ports: ["8000:8000"]
+    networks: [internal]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "worker.run"]
+    environment:
+      PRAMANA_QUEUE_URL: redis://queue:6379/0
+      PRAMANA_OFFLINE: "1"
+    volumes:
+      - ./out:/app/out
+      - ./conformance:/app/conformance:ro
+      - ./taxonomy.yaml:/app/taxonomy.yaml:ro
+    depends_on:
+      queue: {condition: service_healthy}
+    networks: [internal]
+
+  console:
+    build:
+      context: ./console
+      dockerfile: Dockerfile
+    environment:
+      PRAMANA_API: http://api:8000
+    depends_on: [api]
+    ports: ["3000:3000"]
+    networks: [internal]
+
+volumes:
+  db_data:
+
+networks:
+  internal:
+    driver: bridge
+    # No external network is declared anywhere in this file. The only published ports
+    # are the two a human needs on the assessment host itself.

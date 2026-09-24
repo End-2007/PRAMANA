@@ -1,0 +1,125 @@
+# ---------------------------------------------------------------------------
+# What must NOT enter Git, and why.
+#
+# The rule: anything large here is either downloadable from a permanent source with a
+# published digest, or regenerable from a pinned script and a seed. A repository whose
+# large artefacts are all reproducible from offline-manifest.yaml is a better
+# demonstration of clause 2.3's "reproducible audit log" than one that ships the blobs.
+# ---------------------------------------------------------------------------
+
+# Datasets -- fetched via scripts/, digests recorded in offline-manifest.yaml
+data/
+!data/.gitkeep
+
+# The 128-model null population. The publishable artefact is null_summary.json --
+# the fitted quantiles, floors and transfer deltas -- NOT the weights.
+artefacts/
+nulls/*.pt
+nulls/*.pth
+!nulls/*.json
+nulls/raw/
+nulls/weights/
+nulls/keys/
+nulls/.run.lock
+nulls_smoke/
+data/cache/
+
+# Precision-ladder builds, retrains, checkpoints: regenerable from a pinned seed
+runs/
+checkpoints/
+*.onnx
+!conformance/models/*.onnx
+
+# Offline bundle: built by `make wheelhouse` / `make offline-bundle`
+wheelhouse/
+images/
+*.tar
+
+# Assessment output
+out/
+.pramana/
+
+# CC BY-NC material. Never shipped, never imported by pramana/, and kept out of Git
+# so the repository itself carries no NonCommercial content.
+research/backdoorbench/
+research/**/*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / Next.js
+node_modules/
+.next/
+out-console/
+npm-debug.log*
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Secrets -- keys are generated in a ceremony on the deployed instance and never
+# derived from anything that appears in a repository.
+*.pem
+*.key
+!anchors/tsa-cert.pem
+
+# ---------------------------------------------------------------------------
+# Public repository scope
+#
+# The public repository carries the complete frontend (web/ and console/), the API
+# surface, the governance layer (ledger, signing, anchor, disposition, coverage,
+# report schema), the conformance fixtures and the build gates -- enough to read
+# exactly what the instrument does and how its verdicts are recorded.
+#
+# The statistical engines, the training and casework pipelines, the fitted
+# populations and the internal design and strategy records stay in the private
+# working tree. Nothing below is deleted locally; these paths are simply not
+# published.
+# ---------------------------------------------------------------------------
+
+# Statistical engines
+pramana/ladder/
+pramana/reversal/
+pramana/aggregate/
+pramana/partition/
+pramana/receipts/
+pramana/drift/
+pramana/detectors/
+pramana/stats/
+pramana/report/emitter.py
+pramana/report/validator.py
+pramana/demo.py
+
+# Training, casework and experiment pipelines, and their outputs
+experiments/
+scripts/build_casefiles.py
+scripts/fetch_datasets.py
+casework/
+nulls/*
+!nulls/.gitkeep
+tests/test_core.py
+*.log
+
+# Internal design, strategy and status records
+PRAMANA-SIH26228*.md
+PRAMANA-SELECTION-CASE.md
+PRAMANA-BUILD-REQUIREMENTS.md
+STATUS.md
+research/
+
+# Local tooling
+.claude/

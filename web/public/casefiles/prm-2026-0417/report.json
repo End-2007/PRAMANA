@@ -1,0 +1,789 @@
+{
+  "$schema": "https://pramana.local/schema/assurance-report/1.0.json",
+  "report_id": "PRM-2026-0417",
+  "document_status": "ILLUSTRATIVE_EXAMPLE",
+  "document_status_note": "Schema-conformant instance with synthetic values, published to show field structure and the arithmetic each field must satisfy. NOT a measurement record. A screenshot of this out of context is indistinguishable from a results table, which is why the status is a required field.",
+  "generated_at_utc": "2026-09-19T02:25:51+00:00",
+  "assessment": {
+    "tier": "T2",
+    "access_tier": "A2",
+    "build_state": "built",
+    "turnaround_s": {
+      "triage_s": 3.4,
+      "full_s": 47.9
+    }
+  },
+  "battery": {
+    "generation": 7,
+    "battery_a_digest": "sha256:94e61a66280d0d5aaa921bbcd32e1edf633a6ccb6b6a91db8e24bc59db45438b",
+    "battery_b_digest": "sha256:73b72ecc05659e5eba488973955b3ebed0364b31a20c5b03d6d348f0d04f8cda",
+    "committed_at_utc": "2026-09-10T09:15:00Z",
+    "committed_before_artefact_receipt": true,
+    "battery_b_opened": false,
+    "taxonomy_digest": "sha256:1b54102a28ddac34c5d3dff60e616571173a3d24eaca090e7b0542da5db961c4",
+    "threshold_file_digest": "sha256:79dd408765b9f7268aa2ffafe87dc777e69973afd347e4578a925ca88dc9cb38",
+    "seed": null,
+    "battery_custody": {
+      "digest_custodian": "assurance-ledger (hash chain, externally anchored)",
+      "material_custodian": "DGIS-assurance-authority-2",
+      "assessing_team": "assurance-cell-north",
+      "custodians_distinct": true,
+      "control_type": "organisational",
+      "defeats": [
+        "post_hoc_alteration_of_battery_contents"
+      ],
+      "does_not_defeat": [
+        "selection_of_which_sealed_battery_to_open_after_seeing_the_artefact"
+      ],
+      "residual_mitigation": [
+        "committed_seed",
+        "single_use_per_delivery"
+      ]
+    }
+  },
+  "null_calibration": {
+    "null_family": "resnet18",
+    "null_corpus": "gtsrb",
+    "null_population": "resnet18-gtsrb-clean-n64",
+    "arms": [
+      {
+        "arm": "resnet18/gtsrb",
+        "n": 64,
+        "role": "operational_null"
+      },
+      {
+        "arm": "resnet18/cifar10",
+        "n": 32,
+        "role": "corpus_contrast_only"
+      },
+      {
+        "arm": "smallcnn/cifar10",
+        "n": 32,
+        "role": "family_contrast_only"
+      }
+    ],
+    "p_floors": {
+      "l1_detection": 0.015384615384615385,
+      "l1_basis": "1/(64+1); one unmultiplied test at alpha=0.05",
+      "l2_localisation": 0.0003632401017072285,
+      "l2_basis": "1/(64*43+1) = 1/2753",
+      "l2_pooling": "per_class_standardised_before_pooling",
+      "l2_bh_smallest_critical_value": 0.0011627906976744186,
+      "l2_basis_note": "alpha/43; floor is 3.2x below it"
+    },
+    "null_corpus_transfer_delta": {
+      "contrast": "resnet18/gtsrb/torch.ao.fx.ptq.x86 vs resnet18/cifar10/torch.ao.fx.ptq.x86",
+      "factor": "corpus",
+      "median_shift_over_iqr": 4.697,
+      "bootstrap_ci_median_shift": [
+        3.6064,
+        7.8526
+      ],
+      "alpha_tail_shift_over_iqr": 7.848,
+      "quantile_resolution": "under_resolved_at_n32"
+    },
+    "null_family_transfer_delta": {
+      "contrast": "resnet18/cifar10/torch.ao.fx.ptq.x86 vs smallcnn/cifar10/torch.ao.fx.ptq.x86",
+      "factor": "architecture_family",
+      "median_shift_over_iqr": 4.19,
+      "bootstrap_ci_median_shift": [
+        2.799,
+        10.3014
+      ],
+      "alpha_tail_shift_over_iqr": 4.1258,
+      "quantile_resolution": "under_resolved_at_n32"
+    },
+    "transfer_ceiling": {
+      "max_median_shift_over_iqr_permitted": 0.5,
+      "family_delta_exceeds_ceiling": true,
+      "corpus_delta_exceeds_ceiling": true,
+      "affects_this_report": false,
+      "consequence_recorded": "Measured corpus delta 4.70 and family delta 4.19 both exceed the 0.5 ceiling, so reuse of this null on any other corpus or family is refused: assessment_unavailable no_fitted_null.",
+      "why_not": "the artefact is resnet18/gtsrb/torch.ao.fx.ptq.x86, matching the null index exactly"
+    },
+    "ood_backbone": {
+      "backbone_corpus_digest": "sha256:d53fbe75c1786d38a42e8fe411eff33b999a6440da0ff33cb2b92fba8a67cb8d",
+      "disjoint_from_assessed_shards": true,
+      "pinned_to_battery_generation": 7,
+      "disjointness_basis": "backbone trained in-house on CIFAR-10, a corpus disjoint from every GTSRB lot",
+      "failure_value_if_violated": "assessment_unavailable: backbone_corpus_contaminated"
+    },
+    "declared_assumptions": [
+      "backbone_corpus_disjoint_from_assessed_shards"
+    ]
+  },
+  "artefact": {
+    "logical_model_id": "ugv-tsr-r18-dlv-2026-0417",
+    "family": "resnet18",
+    "preprocessing_chain_digest": "sha256:18b9d85f194dc9be4ad3f1fbb3d70aa0be26af76de92068c6a71db3b2a579e6e",
+    "builds": [
+      {
+        "rung": "fp32",
+        "format": "torchscript",
+        "digest": "sha256:0b484710483c8e0251d63ba452c8f71e9f9eab99c6543c6995e0083a3a7d73ed",
+        "signer": "integrator-02",
+        "role": "reference",
+        "certified": false,
+        "conversion": null
+      },
+      {
+        "rung": "fp16",
+        "format": "pytorch",
+        "digest": "sha256:1757b771c82589386a6ae5e8aabb39d8118fc6ecc992cfca963131dac8a87b42",
+        "signer": "integrator-02",
+        "role": "delivered_not_deployed",
+        "certified": false,
+        "conversion": null
+      },
+      {
+        "rung": "int8_ptq",
+        "format": "pytorch",
+        "digest": "sha256:b610eea972f78215174d8033e17adb19b945cc7babd6fefecb67be0a71c14b0a",
+        "signer": "integrator-02",
+        "role": "will_run",
+        "certified": true,
+        "conversion": {
+          "quantiser": "torch.ao.fx.ptq.x86",
+          "calibration_set_digest": "sha256:d85d9ed6b4357785e67e3b745b75a9e23673f31e373d4d9bb2dc3d2f23aaed3a",
+          "scale_table_digest": "sha256:b9c3423335d0b384a06d8956b15228c0eb7ff08b75ef89e56a0d86b2399b7594"
+        }
+      },
+      {
+        "rung": "pruned",
+        "format": "pytorch",
+        "digest": "sha256:51eefce9fe443919bf02b570a6e869067eede97a67808e4b59ae9c6828ef718a",
+        "signer": "integrator-02",
+        "role": "delivered_not_deployed",
+        "certified": false,
+        "conversion": null
+      }
+    ]
+  },
+  "precision_ladder": {
+    "rungs_assessed": [
+      "fp32",
+      "fp16",
+      "int8_ptq",
+      "pruned",
+      "torchscript"
+    ],
+    "rungs_declared_unavailable": [
+      "onnx",
+      "int8_qat"
+    ],
+    "fingerprint_divergence": [
+      {
+        "pair": "fp32\u2192fp16",
+        "probes_diverging": 0,
+        "probes_total": 200,
+        "level": "L1_detection",
+        "detection_p": 0.9692307692307692,
+        "detection_p_reported_as": "0.96923",
+        "detection_p_is_floor": false,
+        "detection_p_basis": "1/(64+1); one unmultiplied test at alpha=0.05",
+        "detection_fires": false,
+        "null_family": "resnet18",
+        "null_corpus": "gtsrb",
+        "null_population": "resnet18-gtsrb-clean-n64-fp16",
+        "divergence_concentration_gini": 0.8011,
+        "divergence_concentration_classes": 10,
+        "dominant_class": 30,
+        "concentration_operating_point": "gini >= 0.7 over <= 3 classes",
+        "concentration_operating_point_status": "predicted",
+        "concentration_operating_point_source": "E10 (classes affected x trigger amplitude) surface",
+        "concentration_operating_point_fpr_vs_null": null,
+        "concentration_condition_met": false,
+        "concentration_is_within_artefact": true,
+        "concentration_note": "D1's within-artefact concentration over classes. NOT C9's demoted shard_gini; the two are named differently on purpose.",
+        "interpretation": "no_finding"
+      },
+      {
+        "pair": "fp32\u2192int8_ptq",
+        "probes_diverging": 13,
+        "probes_total": 200,
+        "level": "L1_detection",
+        "detection_p": 0.015384615384615385,
+        "detection_p_reported_as": "<= 0.01538",
+        "detection_p_is_floor": true,
+        "detection_p_basis": "1/(64+1); one unmultiplied test at alpha=0.05",
+        "detection_fires": true,
+        "null_family": "resnet18",
+        "null_corpus": "gtsrb",
+        "null_population": "resnet18-gtsrb-clean-n64",
+        "divergence_concentration_gini": 0.9764,
+        "divergence_concentration_classes": 1,
+        "dominant_class": 8,
+        "concentration_operating_point": "gini >= 0.7 over <= 3 classes",
+        "concentration_operating_point_status": "predicted",
+        "concentration_operating_point_source": "E10 (classes affected x trigger amplitude) surface",
+        "concentration_operating_point_fpr_vs_null": null,
+        "concentration_condition_met": true,
+        "concentration_is_within_artefact": true,
+        "concentration_note": "D1's within-artefact concentration over classes. NOT C9's demoted shard_gini; the two are named differently on purpose.",
+        "interpretation": "concentrated_divergence_qcb_candidate"
+      },
+      {
+        "pair": "fp32\u2192pruned",
+        "probes_diverging": 0,
+        "probes_total": 200,
+        "level": "L1_detection",
+        "detection_p": 0.9846153846153847,
+        "detection_p_reported_as": "0.98462",
+        "detection_p_is_floor": false,
+        "detection_p_basis": "1/(64+1); one unmultiplied test at alpha=0.05",
+        "detection_fires": false,
+        "null_family": "resnet18",
+        "null_corpus": "gtsrb",
+        "null_population": "resnet18-gtsrb-clean-n64-pruned",
+        "divergence_concentration_gini": 0.7808,
+        "divergence_concentration_classes": 12,
+        "dominant_class": 25,
+        "concentration_operating_point": "gini >= 0.7 over <= 3 classes",
+        "concentration_operating_point_status": "predicted",
+        "concentration_operating_point_source": "E10 (classes affected x trigger amplitude) surface",
+        "concentration_operating_point_fpr_vs_null": null,
+        "concentration_condition_met": false,
+        "concentration_is_within_artefact": true,
+        "concentration_note": "D1's within-artefact concentration over classes. NOT C9's demoted shard_gini; the two are named differently on purpose.",
+        "interpretation": "no_finding"
+      }
+    ],
+    "converter_provenance": {
+      "certified_rung": "int8_ptq",
+      "recorded_not_certified_rungs": [
+        "fp16",
+        "pruned"
+      ],
+      "vendor_vs_integrator": null,
+      "shared_scale_table": null,
+      "mismatch_finding_class_if_it_fires": "converter_provenance_mismatch",
+      "note": "We certify the build that will run and record the digest of every build that will not."
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "F-1",
+      "mechanism": "precision_ladder_divergence",
+      "reason_code": "concentrated_cross_rung_divergence",
+      "affected_asset": "build:int8_ptq",
+      "rung": "int8_ptq",
+      "parameterisation": null,
+      "class": null,
+      "contributor": null,
+      "level": "L1_detection",
+      "reported_only_because": null,
+      "statistic": {
+        "name": "cross_rung_divergence",
+        "value": 0.03326401,
+        "p_floor": 0.015384615384615385,
+        "p_is_floor": true,
+        "null_population": "resnet18-gtsrb-clean-n64",
+        "null_family": "resnet18",
+        "null_corpus": "gtsrb",
+        "pooling": null,
+        "bh_classes_tested": null,
+        "fdr": null,
+        "bh_critical_value_at_rank_1": null,
+        "bh_rejects": null,
+        "bh_adjusted_q": null,
+        "merging_function": null,
+        "merge_weights_committed_in": null,
+        "within_detector_merge": null,
+        "sources_tested": null,
+        "size_normalised": null,
+        "ebh_threshold_at_k1": null,
+        "ebh_rejections": null,
+        "note": "Empirical rank against 64 clean conversions."
+      },
+      "evidence": [
+        {
+          "kind": "divergence_profile",
+          "digest": null,
+          "detail": "13/200 probes"
+        },
+        {
+          "kind": "concentration",
+          "digest": null,
+          "detail": "gini=0.976 over 1 classes"
+        }
+      ],
+      "surrogate": null,
+      "attribution_mode": "set_valued",
+      "attribution_set": [
+        "lot-07"
+      ],
+      "attribution_set_size": 1,
+      "containment_scope": [
+        "lot-07"
+      ],
+      "attribution_note": "Set-valued: corroborated, not causal_verified. S3 leave-lot-out is a T3 mechanism and was not run at this access tier.",
+      "evidence_strength": "corroborated",
+      "corroborating_mechanisms": [
+        "class_localisation_l2",
+        "source_aggregation"
+      ],
+      "disposition": null,
+      "note": null
+    },
+    {
+      "finding_id": "F-2",
+      "mechanism": "source_aggregation",
+      "reason_code": "source_evalue_exceeds_ebh_threshold",
+      "affected_asset": "lot:lot-07",
+      "rung": null,
+      "parameterisation": null,
+      "class": null,
+      "contributor": "lot-07",
+      "level": null,
+      "reported_only_because": null,
+      "statistic": {
+        "name": "e_value_merged",
+        "value": 294.9645,
+        "p_floor": null,
+        "p_is_floor": null,
+        "null_population": null,
+        "null_family": null,
+        "null_corpus": null,
+        "pooling": null,
+        "bh_classes_tested": null,
+        "fdr": 0.05,
+        "bh_critical_value_at_rank_1": null,
+        "bh_rejects": null,
+        "bh_adjusted_q": null,
+        "merging_function": "weighted_arithmetic_mean",
+        "merge_weights_committed_in": "sha256:d8dd15bdb3b7487770faac777497393ed2f59d67dfe15088e7aff38e7527b5d9",
+        "within_detector_merge": "arithmetic_mean_size_normalised",
+        "sources_tested": 12,
+        "size_normalised": true,
+        "ebh_threshold_at_k1": 240.0,
+        "ebh_rejections": 1,
+        "note": "e-BH rejects source i when e_i >= m/(alpha*k) = 12/(0.05*1) = 240.0. Rejected at declared FDR."
+      },
+      "evidence": [],
+      "surrogate": null,
+      "attribution_mode": "set_valued",
+      "attribution_set": [
+        "lot-07"
+      ],
+      "attribution_set_size": 1,
+      "containment_scope": [
+        "lot-07"
+      ],
+      "attribution_note": null,
+      "evidence_strength": "indicative",
+      "corroborating_mechanisms": [],
+      "disposition": null,
+      "note": "Statistically flagged at a declared FDR; causally unverified."
+    }
+  ],
+  "supplier_concentration_measurement": {
+    "scope": "surrogate_ensemble",
+    "scope_note": "certified_floor_k is a property of the partition ensemble built for this measurement, and never of the artefact that ships. The two do not compose.",
+    "partition_basis": "contract_lot",
+    "m_lots": 12,
+    "aggregator": "run_off_election",
+    "certified_floor_k": 2,
+    "certified_floor_k_entities": null,
+    "certified_fraction_at_k": 0.91,
+    "surrogate_gap_top1": 0.0287,
+    "volume_inequality": {
+      "lot_volume_shares": {
+        "lot-01": 0.21,
+        "lot-02": 0.17,
+        "lot-03": 0.13,
+        "lot-04": 0.11,
+        "lot-05": 0.09,
+        "lot-06": 0.08,
+        "lot-07": 0.07,
+        "lot-08": 0.05,
+        "lot-09": 0.04,
+        "lot-10": 0.03,
+        "lot-11": 0.01,
+        "lot-12": 0.01
+      },
+      "shares_sum_check": 1.0,
+      "largest_single_share": 0.21,
+      "volume_share_of_largest_k": 0.38,
+      "k_is_a_count_not_a_volume": true
+    },
+    "certificate_scope_degenerate": null,
+    "entity_map_incomplete": "no_per_lot_beneficial_ownership_disclosure"
+  },
+  "drift_assessment": {
+    "axes": [
+      {
+        "axis": "illumination",
+        "status": "assessed",
+        "drift_realism": "measured",
+        "reason": null,
+        "score": 0.21,
+        "score_basis": "empirical quantile against the fitted drift null"
+      },
+      {
+        "axis": "sensor",
+        "status": "assessed",
+        "drift_realism": "corruption_model_proxy",
+        "reason": null,
+        "score": 0.33,
+        "score_basis": "corruption model, not a capture across sensors"
+      },
+      {
+        "axis": "terrain",
+        "status": "declared_unsupported",
+        "drift_realism": "not_applicable",
+        "reason": "no_defence_domain_corpus",
+        "score": null,
+        "score_basis": null
+      },
+      {
+        "axis": "season",
+        "status": "declared_unsupported",
+        "drift_realism": "not_applicable",
+        "reason": "no_defence_domain_corpus",
+        "score": null,
+        "score_basis": null
+      }
+    ],
+    "primary_discriminator": "contributor_concentration",
+    "discriminator_order": [
+      "contributor_concentration",
+      "covariate_vs_concept_decomposition",
+      "input_conditionality"
+    ],
+    "corroborating_features": [
+      "shard_gini",
+      "spectral_band_ratio"
+    ],
+    "verdict": "MANIPULATION",
+    "verdict_note": "All available discriminators agree."
+  },
+  "coverage": {
+    "taxonomy_digest": "sha256:1b54102a28ddac34c5d3dff60e616571173a3d24eaca090e7b0542da5db961c4",
+    "taxonomy_generation": 7,
+    "items": [
+      {
+        "class_id": "trigger_injection_patch",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.trigger_score",
+          "C3b.reversal",
+          "C3a.ladder"
+        ],
+        "attribution_ceiling": "causal_verified"
+      },
+      {
+        "class_id": "label_flipping",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.label_consistency"
+        ],
+        "attribution_ceiling": "statistically_attributed"
+      },
+      {
+        "class_id": "systematic_mislabelling",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.label_consistency",
+          "C9.contributor_concentration"
+        ],
+        "attribution_ceiling": "statistically_attributed"
+      },
+      {
+        "class_id": "near_duplicate_flooding",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.duplicate_flood"
+        ],
+        "attribution_ceiling": "statistically_attributed"
+      },
+      {
+        "class_id": "ood_insertion",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.ood_mahalanobis"
+        ],
+        "attribution_ceiling": "statistically_attributed"
+      },
+      {
+        "class_id": "clean_label_poison",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C2p.latent_cluster"
+        ],
+        "attribution_ceiling": "statistically_attributed"
+      },
+      {
+        "class_id": "backdoor_fp32_static",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C3b.reversal",
+          "C3d.activation_stats",
+          "C3a.ladder"
+        ],
+        "attribution_ceiling": "causal_verified"
+      },
+      {
+        "class_id": "quantisation_conditioned_backdoor",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C3a.ladder",
+          "C3bp.surrogate_reversal"
+        ],
+        "attribution_ceiling": "set_valued"
+      },
+      {
+        "class_id": "malicious_converter",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C3a.converter_provenance"
+        ],
+        "attribution_ceiling": "causal_verified_if_signed"
+      },
+      {
+        "class_id": "malicious_calibration_set",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C3a.calibration_digest"
+        ],
+        "attribution_ceiling": "causal_verified_if_signed"
+      },
+      {
+        "class_id": "model_substitution",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C1.digest_verify",
+          "C3a.ladder"
+        ],
+        "attribution_ceiling": "causal_verified"
+      },
+      {
+        "class_id": "trigger_warping",
+        "disposition": "declared_unsupported",
+        "reason": "Reversal parameterisation does not cover warping fields at T1.",
+        "mechanisms": [],
+        "attribution_ceiling": "unattributable"
+      },
+      {
+        "class_id": "trigger_input_aware",
+        "disposition": "declared_unsupported",
+        "reason": "Per-class minimal-perturbation solve assumes a static trigger.",
+        "mechanisms": [],
+        "attribution_ceiling": "unattributable"
+      },
+      {
+        "class_id": "reversal_detection_head",
+        "disposition": "declared_unsupported",
+        "reason": "Reversal is specified for classification logits. Replaced by the amplitude-sweep appearance/disappearance rate.",
+        "mechanisms": [],
+        "attribution_ceiling": "unattributable"
+      },
+      {
+        "class_id": "architectural_backdoor",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C3a.ladder",
+          "C3d.activation_stats"
+        ],
+        "attribution_ceiling": "unattributable"
+      },
+      {
+        "class_id": "undetectable_by_construction",
+        "disposition": "declared_unsupported",
+        "reason": "Out of scope BY THEOREM, not by engineering gap. Goldwasser, Kim, Vaikuntanathan and Zamir (arXiv:2204.06974) construct backdoors no efficient black-box behavioural test detects. Detection is the precondition for attribution.",
+        "mechanisms": [],
+        "attribution_ceiling": "unattributable"
+      },
+      {
+        "class_id": "receipt_replay",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C6.nonce",
+          "C6.sequence_counter",
+          "C6.chain_position"
+        ],
+        "attribution_ceiling": "causal_verified"
+      },
+      {
+        "class_id": "receipt_alteration",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C6.signature",
+          "C1.hash_chain",
+          "C1.external_anchor"
+        ],
+        "attribution_ceiling": "causal_verified"
+      },
+      {
+        "class_id": "drift_illumination",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C9.discriminators"
+        ],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "drift_sensor",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C9.discriminators"
+        ],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "drift_acquisition",
+        "disposition": "assessed",
+        "reason": null,
+        "mechanisms": [
+          "C9.discriminators"
+        ],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "drift_terrain",
+        "disposition": "declared_unsupported",
+        "reason": "no_defence_domain_corpus -- a street-sign benchmark has no terrain axis. xView/DOTA was cut rather than claimed.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "drift_season",
+        "disposition": "declared_unsupported",
+        "reason": "no_defence_domain_corpus -- see drift_terrain.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "network_in_transit",
+        "disposition": "declared_unsupported",
+        "reason": "out_of_scope: solved by signing. PRAMANA consumes signatures as substrate.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "certifier_insider",
+        "disposition": "declared_unsupported",
+        "reason": "out_of_scope: organisational. The external anchor (RFC 3161 / transparency log) makes retroactive alteration detectable to a third party; it does not name the operator.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "contributor_key_compromise",
+        "disposition": "declared_unsupported",
+        "reason": "out_of_scope: key_compromise is a PKI problem, not a behavioural one.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      },
+      {
+        "class_id": "federated_encrypted_contribution",
+        "disposition": "declared_unsupported",
+        "reason": "out_of_scope: no_raw_data_access. PRAMANA assumes delivered shards.",
+        "mechanisms": [],
+        "attribution_ceiling": null
+      }
+    ],
+    "assessed": 17,
+    "declared_unsupported": 10,
+    "not_assessed": 0,
+    "total_classes": 27,
+    "sum_check": 27
+  },
+  "disposition": {
+    "state": "QUARANTINE",
+    "rationale": "Risk acceptance revoked: receipt e-process crossed 1/alpha at receipt 4041. Prior rationale: Overridden from QUARANTINE by a named authority. Original basis: F-1 (corroborated) -> QUARANTINE F-2 (indicative) -> ACCEPT_WITH_CONDITIONS Unavailable assessments: trigger_warping.",
+    "risk_acceptance": {
+      "authority_name": "RAA-DGIS-03",
+      "authority_role": "Programme Risk Acceptance Authority, DGIS",
+      "accepted_at_utc": "2026-09-17T14:05:00Z",
+      "expires_at_utc": "2026-12-16T14:05:00Z",
+      "compensating_controls": [
+        "Receipt-stream e-process monitoring on every fielded vehicle",
+        "Human confirmation on any 'Speed limit (120km/h)' read above 40 km/h",
+        "Re-assessment at 90 days or on any converter version change"
+      ],
+      "reassessment_triggers": [
+        "converter_version_change",
+        "calibration_set_change",
+        "lot_admitted",
+        "contract_relet",
+        "receipt_eprocess_crossing",
+        "expiry_reached"
+      ],
+      "ledger_entry_digest": null,
+      "revoked": true,
+      "revoked_reason": "receipt e-process crossed 1/alpha at receipt 4041"
+    }
+  },
+  "assurance_debt": {
+    "items": [
+      {
+        "debt_id": "DBT-001",
+        "description": "Per-lot ultimate-beneficial-owner disclosure absent, so the entity floor cannot be computed",
+        "owner_class": "contracting_authority",
+        "magnitude": 12.0,
+        "unit": "lots",
+        "retirement_condition": "entity map disclosed at award and refreshed on change of control",
+        "clause_that_would_retire_it": "DAP 2020 Ch. VI Standard Contract Document (proposed amendment)",
+        "first_raised_in_report": "PRM-2026-0417",
+        "status": "opened"
+      },
+      {
+        "debt_id": "DBT-002",
+        "description": "ONNX rung unassessed: onnxruntime not staged in the offline bundle",
+        "owner_class": "assessor",
+        "magnitude": 1.0,
+        "unit": "rungs",
+        "retirement_condition": "stage onnxruntime wheel with digest in offline-manifest.yaml",
+        "clause_that_would_retire_it": null,
+        "first_raised_in_report": "PRM-2026-0417",
+        "status": "opened"
+      }
+    ],
+    "by_owner_class": {
+      "contracting_authority": {
+        "lots": 12.0
+      },
+      "assessor": {
+        "rungs": 1.0
+      }
+    },
+    "grand_total": "refused: units_not_commensurable"
+  },
+  "external_anchor": {
+    "anchor_procedure": "local",
+    "anchor_type": "rfc3161",
+    "merkle_root": "sha256:04e6595c4ed0209acf1d6bcd2d0da5ee2dfa54bb0172f67093ff49cd517d2800",
+    "anchor_state": "pending",
+    "anchor_batch_interval_s": 86400,
+    "anchor_lag_s": 60.0,
+    "token_digest": "sha256:0d877555f74b4c04466593eac97ad551d2e3a05e2c63f10ff4ab41a5bc918b0e",
+    "note": "Converts 'trust us' into 'trust us or catch us'. It does NOT stop a compromised certifier; it removes the ability to alter the record afterwards."
+  },
+  "verdict_statement": "No evidence of conditional misbehaviour was found under battery sha256:94e6\u2026438b at rungs fp32, fp16, int8_ptq, pruned, torchscript, against null (family=resnet18, corpus=gtsrb, converter=int8_ptq).",
+  "declared_assumptions": [
+    "backbone_corpus_disjoint_from_assessed_shards",
+    "null_corpus_transfer_not_invoked_for_this_artefact"
+  ],
+  "assessment_unavailable": [
+    {
+      "assessment_unavailable": "insufficient_access_tier",
+      "assessment_unavailable_detail": "warping-trigger family is declared_unsupported: the reversal parameterisation does not cover warping fields at this tier",
+      "affected_asset": "artefact:prm-2026-0417"
+    }
+  ]
+}

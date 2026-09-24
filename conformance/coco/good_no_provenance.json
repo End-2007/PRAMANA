@@ -1,0 +1,82 @@
+{
+  "info": {
+    "description": "PRAMANA conformance fixture: COCO with contributor provenance"
+  },
+  "licenses": [
+    {
+      "id": 1,
+      "name": "CC-BY-4.0"
+    }
+  ],
+  "images": [
+    {
+      "id": 1,
+      "file_name": "img_0001.png",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "id": 2,
+      "file_name": "img_0002.png",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "id": 3,
+      "file_name": "img_0003.png",
+      "width": 64,
+      "height": 64
+    }
+  ],
+  "annotations": [
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 14,
+      "bbox": [
+        8,
+        8,
+        20,
+        20
+      ],
+      "area": 400,
+      "iscrowd": 0
+    },
+    {
+      "id": 2,
+      "image_id": 2,
+      "category_id": 2,
+      "bbox": [
+        4,
+        4,
+        30,
+        30
+      ],
+      "area": 900,
+      "iscrowd": 0
+    },
+    {
+      "id": 3,
+      "image_id": 3,
+      "category_id": 14,
+      "bbox": [
+        1,
+        1,
+        10,
+        10
+      ],
+      "area": 100,
+      "iscrowd": 0
+    }
+  ],
+  "categories": [
+    {
+      "id": 2,
+      "name": "speed_50"
+    },
+    {
+      "id": 14,
+      "name": "stop"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+PRAMANA — Behavioural integrity assurance for multi-contributor computer-vision pipelines
+Copyright 2026 The PRAMANA Team
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--------------------------------------------------------------------------------
+WHY APACHE-2.0 AND NOT MIT
+--------------------------------------------------------------------------------
+
+We have not completed a patent search, and a known commercial vendor in this space
+states publicly that it holds granted patents on model scanning. For a project with
+unresolved patent exposure in its own risk register, Apache-2.0's express patent grant
+and defensive-termination clause (Section 3) are load-bearing where MIT's silence is
+not. The choice is recorded here so it reads as a decision rather than a default.
+
+--------------------------------------------------------------------------------
+PRIOR ART WE BUILD ON AND DO NOT CLAIM
+--------------------------------------------------------------------------------
+
+Every mechanism in this system is published work. The contribution is the record
+discipline around them, and naming the antecedents is part of that discipline.
+
+  Trigger reversal
+    Neural Cleanse (Wang et al., IEEE S&P 2019) and descendants.
+
+  Cross-precision differential testing
+    DiffChaser (Xie, Ma, Chen et al., IJCAI 2019)
+    DiverGet (arXiv:2207.06282, EMSE 2022)
+    Characterizing quantized model behaviour (arXiv:2204.04220)
+    PrecisionDiff (arXiv:2604.19790)
+
+  Quantisation-conditioned backdoors — our threat model, their discovery
+    arXiv:2104.15129 · arXiv:2108.09187 · arXiv:2110.13541
+    QuRA (arXiv:2510.09647) · Quantization Blindspots (arXiv:2512.06243)
+    Repairs: EFRAP (CVPR 2024), QVec, FlipGuard, QuantGuard
+
+  Certified poisoning defence, group-and-vote
+    Bagging (arXiv:2008.04495)
+    Deep Partition Aggregation / Finite Aggregation (arXiv:2202.02628)
+    Run-Off Election (arXiv:2302.02300) — the aggregator we use
+    Lethal Dose Conjecture (arXiv:2208.03309)
+    CBD (arXiv:2310.17498) — model-level certified detection with an FPR bound
+
+  Contributor-denominated certification
+    FLCert (arXiv:2210.00584, IEEE TIFS) — owns the client-denominated certificate
+    CARVY-FL (arXiv:2608.28992)
+
+  E-values and anytime-valid inference
+    Vovk & Wang (arXiv:1912.06116, Ann. Statist. 49(3)) — merging by averaging
+    Conformal test martingales (arXiv:2102.10439)
+    WATCH (arXiv:2505.04608, ICML 2025) — weighted monitoring and shift diagnosis
+    e-detectors (arXiv:2203.03532)
+
+  Quantisation-error verification — stronger than us over the region it covers
+    QEBVerif (arXiv:2212.02781)
+    ReluDiff / NeuroDiff / VeryDiff (arXiv:2001.03662, 2009.09943, 2410.20207)
+
+  Machine-readable assurance argumentation
+    AMLAS lineage (arXiv:2211.04530)
+    Evidential Tool Bus (arXiv:2403.01918)
+    ScenicProver (arXiv:2511.02164)
+    AIRS (arXiv:2511.12668) — the nearest integrated system
+
+  Signed model provenance
+    Sigstore model-transparency, in-toto, SLSA — they attest bytes and signer, and
+    their own documentation states they do not attest behaviour.
+
+  The limit that bounds every row above
+    Planting Undetectable Backdoors in Machine Learning Models
+    (Goldwasser, Kim, Vaikuntanathan, Zamir — arXiv:2204.06974)
+
+--------------------------------------------------------------------------------
+DATASETS
+--------------------------------------------------------------------------------
+
+  GTSRB — German Traffic Sign Recognition Benchmark
+    CC-BY-4.0. Stallkamp, Schlipsing, Salmen, Igel.
+    https://zenodo.org/records/13741936
+
+  CIFAR-10
+    Free for research use. Krizhevsky, Nair, Hinton.
+
+  NIST TrojAI benchmark artefacts
+    NIST open licence (permissive, attribution).
+    https://www.nist.gov/open/license
+
+--------------------------------------------------------------------------------
+DELIBERATELY NOT BUNDLED
+--------------------------------------------------------------------------------
+
+  BackdoorBench (https://github.com/SCLBD/BackdoorBench)
+    CC BY-NC-4.0 — NonCommercial, which is not an open-source licence under the Open
+    Source Definition and is a direct obstacle to this project's deployment path. It
+    lives in research/, is excluded from the container image and from
+    offline-manifest.yaml, and is used only to cross-check our own attack
+    implementations. The attacks that ship are ours, written from the original papers.
+
+  Redis
+    Left BSD-3-Clause in March 2024; now tri-licensed AGPLv3 / SSPLv1 / RSALv2. We use
+    Valkey (BSD-3-Clause, Linux Foundation) instead. A defence assurance instrument
+    should not carry a source-available dependency, and the swap is one line.
+
+  torchvision pretrained weights
+    `pretrained=True` is simultaneously an air-gap violation (clause 2.2.6) and a
+    reference-contamination bug: a backbone trained on the procurement corpus makes the
+    poisoned shards part of the reference the detector measures deviation from. Our
+    backbone is trained in-house on a declared, disjoint public corpus.
